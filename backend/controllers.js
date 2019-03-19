@@ -2,76 +2,51 @@ const Task = require('./models');
 
 module.exports = {
 
-    displayAll: function(req, res) {
-    	Task.find({}, function(err, tasks) {
-            if (err) {
-              console.log("Something went wrong!", err);
-              res.json({message: "Error", error: err});
-            } else {
-              console.log(tasks)
-              res.json({message: "Success! Displaying all tasks:", tasks: tasks})
-            }
-        })
-    },
+  displayAll: (req, res) => {
+    Task.find()
+      .then(data => console.log(data) || res.json(data))
+      .catch(err => console.log(err) || res.json(err));
+  },
 
-    displayOneTask: function(req, res) {
-    	let id = req.params.id;
-        Task.find({_id: id}, function(err, task) {
-            if (err) {
-                console.log("Something went wrong!", err);
-                res.json({message: "Error", error: err});
-            } else {
-                console.log("Success!", task);
-                res.json({message: "Success! Displaying task:", task: task})}
-        })
-    },
+  displayOneTask: (req, res) => {
+    const id = req.params.id;
+    Task.find({_id:id})
+      .then(data => res.json(data))
+      .catch(err => res.json(err));
+  },
 
-    newTask: function(req, res) {
-    	console.log("REQUEST", req.body.title)
-        var task = new Task({title: req.body.title, description: req.body.description, completed: req.body.completed });
-        task.save(function(err,task) {
-            if (err) {
-                console.log("Something went wrong while adding a task!", err);
-                res.json({message: "Something went wrong while adding a task!", error: err});
-            } else {
-                console.log('Successfully added a task!');
-                res.json({message: "Successfully added a task!", task: task})}
-        })
-    },
+  createTask: (req, res) => {
+    const DATA = req.body;
+    Task.create(DATA)
+      .then(data => res.json(data))
+      .catch(err => res.json(err));
+  },
 
-    updateTask: function(req, res) {
-        let id = req.params.id;
-        Task.findById(id, function(err, task) {
-            if (err) {
-                console.log('something went wrong');
-            } else {
-                if (req.body.title) {
-                    task.title = req.body.title;}
-                if (req.body.description) {
-                    task.description = req.body.description;}
-                if (req.params.completed) {
-                    task.completed = req.body.completed;}
-                task.save(function(err) {
-                    if (err) {
-                    console.log("Something went wrong while updating task", err);
-                    res.json({message: "Something went wrong while updating task!", error: err});
-                    } else { 
-                    console.log('Successfully updated a task!');
-                    res.json(task)}
-                })
-            }   
-        })
-    },
-    removeTask: function (req, res){
-        let id = req.params.id;
-        Task.remove({_id: id}, function(err) {
-            if (err){
-                console.log("Something went wrong whilt removing a task", err);
-                res.json({message: "Error", error: err});
-            }else {
-                console.log('Successfully removed a task!');
-                res.json({message: "Successfully removed a task!"})}
-        })
-    },
+  newTask: (req, res) => {
+    const { title, description, completed } = req.body;
+    const task = new Task({ 
+      title: title,
+      description: description,
+      completed: completed
+    });
+    task.save()
+      .then(data => res.json(data))
+      .catch(err => res.json(err));
+  },
+
+  updateTask: (req, res) => {
+    const id = req.params.id;
+    const DATA = req.body;
+    Task.findOneAndUpdate({_id:id}, DATA, {runValidators:true, new:true})
+      .then(results => res.json(results))
+      .catch(errors => res.json(errors));
+  },
+
+  removeTask: (req, res) => {
+    const id = req.params.id;
+    Task.remove({_id:id})
+      .then(data => res.json(data))
+      .catch(err => res.json(err));
+  },
 
 };
